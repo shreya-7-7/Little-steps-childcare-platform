@@ -1,136 +1,195 @@
-# Little Steps — Trusted 24/7 Childcare Platform
+# Little Steps — Trusted 24×7 Childcare Platform
 
-> A full-stack childcare management platform connecting parents, childcare providers, caregivers, and administrators through a role-based web application.
-
----
-
-## 📌 Project Overview
-
-**Little Steps — Trusted 24/7 Childcare Platform** is a MERN-style full-stack childcare management system designed around four primary roles:
-
-- **Parent** — discovers childcare centers and caregivers, creates bookings, manages bookings, subscriptions, and payments.
-- **Provider** — manages childcare centers, caregivers, provider profile, and parent bookings.
-- **Admin** — manages users, providers, centers, bookings, subscriptions, payments, and reports.
-- **Guest** — can access the public landing page and authentication pages.
-
-The supplied source code contains separate `backend/` and `frontend/` applications, with Express/Mongoose APIs, React/Vite UI, role-based authentication, Cloudinary image handling, and Razorpay payment processing.
+A full-stack childcare management platform designed to connect parents with childcare providers and help manage childcare centers, caregivers, bookings, and subscriptions through a role-based web application.
 
 ---
 
-## ✨ Key Features
+## 1. Project Overview
 
-### 👨‍👩‍👧 Parent Module
+**Little Steps — Trusted 24×7 Childcare Platform** is a web-based childcare management system developed to make childcare discovery and management more accessible, organized, and convenient.
 
-- Parent registration and login
-- Protected parent dashboard
-- Browse childcare centers
-- View detailed center information
-- Browse caregiver profiles
-- Create childcare bookings
-- View booking history
-- View individual booking details
-- Cancel pending bookings
-- Payment workflow through Razorpay
-- View payment history
-- Subscription management
-- Parent profile management
+The platform aims to connect parents with childcare centers and caregivers while providing dedicated dashboards for parents, childcare providers, and administrators.
 
-### 🏢 Provider Module
+The project follows a full-stack architecture with separate frontend and backend applications.
 
-- Provider registration
-- Provider approval workflow
-- Provider dashboard
-- Provider profile management
-- Create and manage childcare centers
-- Edit/delete provider centers
-- Manage caregivers
-- Upload caregiver profile images
-- View caregiver details
-- View parent bookings
-- Approve/reject bookings
-- Provider booking details
+### Primary User Roles
 
-### 🛡️ Admin Module
-
-The admin dashboard provides management and reporting functionality for:
-
-- Dashboard statistics
-- Users
-- Providers
-- Provider approval/rejection
-- Childcare centers
-- Center status
-- Bookings
-- Booking status filtering
-- Subscriptions
-- Subscription status filtering
-- Payments
-- Payment status filtering
-- Revenue reporting
-- Booking reporting
-- Subscription reporting
-- Overview reporting
-
-The backend dashboard statistics aggregate users, parents, providers, verified/pending providers, centers, caregivers, bookings, subscriptions, successful payments, and revenue.
-
-### 💳 Razorpay Payments
-
-The payment implementation includes:
-
-1. Create Razorpay order
-2. Save pending payment record
-3. Complete Razorpay checkout
-4. Receive Razorpay order/payment/signature information
-5. Verify the Razorpay HMAC signature on the backend
-6. Mark the payment as successful
-7. Update the related booking payment status
-8. Create/activate subscription data when the payment represents a subscription
-
-The source code uses INR for payment transactions.
-
-### 🖼️ Cloudinary Media Uploads
-
-Cloudinary is used for uploaded media such as provider/caregiver profile images and childcare center images.
-
-The backend contains:
-
-- Cloudinary configuration
-- Multer upload middleware
-- Cloudinary storage
-- Upload utility functions
-
-### 🔐 Authentication & Authorization
-
-Authentication is implemented with:
-
-- JWT
-- HTTP-only cookies
-- bcrypt password hashing
-- Authentication middleware
-- Role middleware
-- Protected routes
-- Guest routes
-- Provider approval checks
-- Blocked-account checks
-
-Supported user roles in the supplied User model:
-
-```text
-parent
-provider
-admin
-```
+- **Parent:** Discovers childcare centers, views center and caregiver information, creates bookings, and manages bookings and subscriptions.
+- **Provider:** Manages provider information, childcare centers, caregivers, and incoming booking requests.
+- **Admin:** Manages users, providers, centers, bookings, subscriptions, and platform operations.
+- **Guest:** Can access public pages and authentication screens.
 
 ---
 
-## 🧰 Technology Stack
+## 2. Problem Statement
+
+Childcare services are often managed through phone calls, personal references, and offline communication. This can make it difficult for parents to find suitable childcare services, understand availability, and compare available options.
+
+Common challenges include:
+
+- Limited visibility into childcare center information.
+- Difficulty finding suitable childcare services.
+- Lack of convenient online booking management.
+- Limited transparency in caregiver and provider information.
+- Fixed childcare arrangements that may not suit working parents and shift-based schedules.
+- Manual management of childcare center operations.
+
+Little Steps aims to address these challenges through a centralized digital platform for childcare discovery and management.
+
+---
+
+## 3. Project Objectives
+
+### Primary Objectives
+
+- Develop a digital platform for childcare services.
+- Allow parents to discover and explore childcare centers.
+- Support childcare booking management.
+- Provide dedicated dashboards for parents, providers, and administrators.
+- Organize provider, caregiver, and center information.
+- Support childcare availability and subscription management.
+
+### Secondary Objectives
+
+- Improve the accessibility of childcare information.
+- Simplify communication and booking-related workflows.
+- Support flexible childcare arrangements.
+- Improve the organization of childcare center operations.
+- Provide a foundation for future expansion across cities and regions.
+
+---
+
+## 4. Key Features
+
+### 4.1 Parent Module
+
+The parent module provides functionality for users to:
+
+- Register and log in.
+- Access a protected parent dashboard.
+- Browse available childcare centers.
+- View individual childcare center details.
+- Browse caregiver information.
+- Create childcare booking requests.
+- View booking history.
+- View individual booking details.
+- Cancel eligible pending bookings.
+- Manage subscriptions.
+- Manage parent profile information.
+
+### 4.2 Childcare Provider Module
+
+The provider module supports childcare providers in managing their services.
+
+Features include:
+
+- Provider registration.
+- Provider approval workflow.
+- Provider dashboard.
+- Provider profile management.
+- Childcare center creation and management.
+- Editing and deleting provider centers.
+- Caregiver management.
+- Caregiver profile image uploads.
+- Viewing caregiver details.
+- Viewing parent booking requests.
+- Approving or rejecting booking requests.
+- Viewing booking details.
+
+### 4.3 Admin Module
+
+The administration module provides centralized management functionality.
+
+Features include:
+
+- Dashboard statistics.
+- User management.
+- Provider management.
+- Provider approval and rejection.
+- Childcare center management.
+- Center status management.
+- Booking management.
+- Booking status filtering.
+- Subscription management.
+- Subscription status filtering.
+- Platform reporting and overview statistics.
+
+### 4.4 Image and Media Management
+
+The application uses Cloudinary for media storage.
+
+The backend includes:
+
+- Cloudinary configuration.
+- Multer upload middleware.
+- Cloudinary storage integration.
+- Upload utility functions.
+
+Media uploads support relevant childcare center and caregiver profile images.
+
+### 4.5 Authentication and Authorization
+
+The application uses role-based authentication and authorization.
+
+The authentication implementation includes:
+
+- JSON Web Tokens (JWT).
+- HTTP-only authentication cookies.
+- bcrypt password hashing.
+- Authentication middleware.
+- Role-based authorization middleware.
+- Protected routes.
+- Guest routes.
+- Provider approval checks.
+- Blocked-account checks.
+
+Supported user roles:
+
+- `parent`
+- `provider`
+- `admin`
+
+---
+
+## 5. Project Scope
+
+### In Scope
+
+The project focuses on:
+
+- A responsive web application.
+- Parent, provider, and administrator dashboards.
+- User registration and authentication.
+- Childcare center discovery and management.
+- Caregiver information management.
+- Booking management.
+- Availability-related management.
+- Subscription management.
+- Provider approval workflows.
+- Administrative operations and reporting.
+
+### Out of Scope
+
+The following are outside the current implementation scope or are intended for future development:
+
+- Native Android and iOS applications.
+- Live CCTV streaming.
+- Medical emergency integrations.
+- Online payment processing and payment gateway integration.
+- Advanced emergency childcare integrations.
+
+---
+
+## 6. Technology Stack
+
+The following technologies are identified in the supplied project documentation.
 
 ### Frontend
 
 | Technology | Purpose |
 |---|---|
-| React 19 | UI framework |
-| Vite | Development/build tooling |
+| React 19 | User interface development |
+| Vite | Development and build tooling |
 | React Router | Client-side routing |
 | Tailwind CSS v4 | Styling |
 | Axios | API communication |
@@ -138,7 +197,7 @@ admin
 | Framer Motion | Animations |
 | Lucide React | Icons |
 | React Icons | Additional icons |
-| Recharts | Admin/report charts |
+| Recharts | Administrative charts |
 | Sonner | Toast notifications |
 | Shadcn/UI | Reusable UI components |
 | js-cookie | Client-side cookie utilities |
@@ -147,53 +206,61 @@ admin
 
 | Technology | Purpose |
 |---|---|
-| Node.js | Runtime |
-| Express 5 | REST API |
+| Node.js | JavaScript runtime |
+| Express 5 | Backend REST API |
 | MongoDB | Database |
-| Mongoose | MongoDB ODM |
-| JWT | Authentication tokens |
+| Mongoose | MongoDB object modeling |
+| JWT | Authentication |
 | bcryptjs | Password hashing |
 | Cookie Parser | Cookie handling |
-| CORS | Cross-origin requests |
-| Multer | File uploads |
-| Cloudinary | Media storage |
-| multer-storage-cloudinary | Multer/Cloudinary integration |
-| Razorpay | Online payments |
+| CORS | Cross-origin request handling |
+| Multer | File upload handling |
+| Cloudinary | Image and media storage |
+| multer-storage-cloudinary | Cloudinary upload integration |
 | Validator | Input validation |
 | dotenv | Environment configuration |
 
-The backend dependency list and frontend dependency list are present in the supplied source material.
-
 ---
 
-## 🏗️ High-Level Architecture
+## 7. High-Level System Architecture
+
+The application follows a client-server architecture.
 
 ```text
-                    ┌──────────────────────────┐
-                    │       React Frontend      │
-                    │      Vite + Tailwind     │
-                    └────────────┬─────────────┘
-                                 │
-                              Axios
-                                 │
-                                 ▼
-                    ┌──────────────────────────┐
-                    │      Express Backend     │
-                    │       REST APIs           │
-                    └────────────┬─────────────┘
-                                 │
-              ┌──────────────────┼──────────────────┐
-              │                  │                  │
-              ▼                  ▼                  ▼
-        ┌───────────┐      ┌────────────┐     ┌────────────┐
-        │ MongoDB   │      │ Cloudinary │     │ Razorpay   │
-        │ + Mongoose│      │   Media    │     │ Payments   │
-        └───────────┘      └────────────┘     └────────────┘
+              ┌──────────────────────────┐
+              │      React Frontend      │
+              │    Vite + Tailwind CSS   │
+              └────────────┬─────────────┘
+                           │
+                         Axios
+                           │
+                           ▼
+              ┌──────────────────────────┐
+              │     Express Backend     │
+              │        REST APIs         │
+              └────────────┬─────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+              ▼                         ▼
+       ┌──────────────┐          ┌──────────────┐
+       │   MongoDB    │          │  Cloudinary  │
+       │  + Mongoose  │          │ Media Storage│
+       └──────────────┘          └──────────────┘
 ```
+
+### Architecture Components
+
+- **Frontend:** Provides the user interface and communicates with the backend through HTTP requests.
+- **Backend:** Handles application logic, authentication, authorization, and API requests.
+- **Database:** Stores user, provider, center, caregiver, booking, and subscription information.
+- **Cloudinary:** Stores supported uploaded images and media.
 
 ---
 
-## 📁 Project Structure
+## 8. Project Structure
+
+The project contains separate frontend and backend applications.
 
 ```text
 Little-Steps-Trusted-24-7-Childcare-Platform/
@@ -202,8 +269,7 @@ Little-Steps-Trusted-24-7-Childcare-Platform/
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── cloudinary.js
-│   │   │   ├── db.js
-│   │   │   └── razorpay.js
+│   │   │   └── db.js
 │   │   │
 │   │   ├── controllers/
 │   │   │   ├── adminController.js
@@ -211,7 +277,6 @@ Little-Steps-Trusted-24-7-Childcare-Platform/
 │   │   │   ├── bookingController.js
 │   │   │   ├── caregiverController.js
 │   │   │   ├── centerController.js
-│   │   │   ├── paymentController.js
 │   │   │   ├── providerController.js
 │   │   │   ├── subscriptionController.js
 │   │   │   └── userController.js
@@ -225,7 +290,6 @@ Little-Steps-Trusted-24-7-Childcare-Platform/
 │   │   │   ├── Booking.js
 │   │   │   ├── Caregiver.js
 │   │   │   ├── Center.js
-│   │   │   ├── Payment.js
 │   │   │   ├── Provider.js
 │   │   │   ├── Subscription.js
 │   │   │   └── User.js
@@ -236,7 +300,6 @@ Little-Steps-Trusted-24-7-Childcare-Platform/
 │   │   │   ├── bookingRoutes.js
 │   │   │   ├── caregiverRoutes.js
 │   │   │   ├── centerRoutes.js
-│   │   │   ├── paymentRoutes.js
 │   │   │   ├── providerRoutes.js
 │   │   │   ├── subscriptionRoutes.js
 │   │   │   └── userRoutes.js
@@ -277,168 +340,150 @@ Little-Steps-Trusted-24-7-Childcare-Platform/
 └── README.md
 ```
 
+*Note: This structure is based on the project structure supplied for documentation. Individual files and folders may change as development continues.*
+
 ---
 
-## 🔑 Authentication Flow
+## 9. Authentication Flow
 
 ### Registration
 
-The backend supports:
+Backend registration endpoint:
 
-```text
+```http
 POST /auth/register
 ```
 
-Parents can register with the basic account information.
+Parents can register using their account information.
 
-Providers additionally submit provider information such as:
+Provider registration additionally supports provider-related information, including:
 
-- Phone
-- Address
-- Qualification
-- Experience
-- Government ID
-- Profile image
+- Phone number.
+- Address.
+- Qualification.
+- Experience.
+- Government identification information.
+- Profile image.
 
-Provider accounts are initially placed into a pending/approval workflow.
+Provider accounts follow an approval workflow.
 
 ### Login
 
-```text
+Backend login endpoint:
+
+```http
 POST /auth/login
 ```
 
-The backend:
+The authentication process includes:
 
-1. Validates the email/password.
-2. Looks up the user.
-3. Compares the password with bcrypt.
-4. Checks blocked status.
-5. Checks provider verification status when applicable.
-6. Generates a JWT.
-7. Stores the JWT in an HTTP-only cookie.
-8. Returns the authenticated user information.
+1. Validating the submitted email and password.
+2. Finding the corresponding user account.
+3. Comparing the password using bcrypt.
+4. Checking account status.
+5. Checking provider approval status where applicable.
+6. Generating a JWT.
+7. Storing the authentication token in an HTTP-only cookie.
+8. Returning authenticated user information.
 
-### Current User
+### Additional Authentication Endpoints
 
-```text
-GET /auth/me
-```
-
-### Logout
-
-```text
-POST /auth/logout
-```
-
-### Profile Update
-
-```text
-PUT /auth/profile
-```
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/auth/me` | Retrieve current authenticated user |
+| POST | `/auth/logout` | Log out the user |
+| PUT | `/auth/profile` | Update user profile |
 
 ---
 
-## 🔒 Role-Based Access
+## 10. Role-Based Access
 
-The application uses middleware to restrict protected operations.
+The application separates functionality according to user roles.
 
-```text
-Guest
-  │
-  ├── Public landing page
-  ├── Login
-  └── Register
+### Guest
 
-Parent
-  │
-  ├── Dashboard
-  ├── Centers
-  ├── Caregivers
-  ├── Bookings
-  ├── Payments
-  └── Subscriptions
+- Public landing page.
+- Login.
+- Registration.
 
-Provider
-  │
-  ├── Dashboard
-  ├── Centers
-  ├── Caregivers
-  ├── Bookings
-  └── Profile
+### Parent
 
-Admin
-  │
-  ├── Dashboard
-  ├── Users
-  ├── Providers
-  ├── Centers
-  ├── Bookings
-  ├── Subscriptions
-  ├── Payments
-  └── Reports
-```
+- Dashboard.
+- Childcare centers.
+- Caregivers.
+- Bookings.
+- Subscriptions.
+- Profile management.
+
+### Provider
+
+- Dashboard.
+- Center management.
+- Caregiver management.
+- Booking management.
+- Provider profile.
+
+### Admin
+
+- Dashboard.
+- User management.
+- Provider management.
+- Center management.
+- Booking management.
+- Subscription management.
+- Reports.
+
+Protected operations use authentication and role-based middleware.
 
 ---
 
-## 🔌 Main API Modules
+## 11. Main API Modules
 
-The backend is organized into the following route modules:
+The backend organizes its APIs into the following modules:
 
-```text
-/auth
-/users
-/bookings
-/caregivers
-/centers
-/providers
-/subscriptions
-/payments
-/admin
-```
+| API Route | Purpose |
+|---|---|
+| `/auth` | Registration, login, logout, and authentication |
+| `/users` | User-related operations |
+| `/bookings` | Booking management |
+| `/caregivers` | Caregiver management |
+| `/centers` | Childcare center management |
+| `/providers` | Provider-related operations |
+| `/subscriptions` | Subscription management |
+| `/admin` | Administrative operations |
 
 ### Booking APIs
 
-The supplied implementation includes operations for:
+The supplied README describes the following booking operations:
 
-- Creating a booking
-- Getting a parent's bookings
-- Getting provider bookings
-- Getting booking details
-- Cancelling a pending booking
-- Approving a booking
-- Rejecting a booking
-
-Example route patterns include:
-
-```text
-POST   /bookings
-GET    /bookings/my-bookings
-PATCH  /bookings/cancel/:id
-GET    /bookings/provider
-PATCH  /bookings/approve/:id
-PATCH  /bookings/reject/:id
-GET    /bookings/:id
-```
+| Method | Example Endpoint | Purpose |
+|---|---|---|
+| POST | `/bookings` | Create a booking |
+| GET | `/bookings/my-bookings` | Retrieve parent bookings |
+| PATCH | `/bookings/cancel/:id` | Cancel an eligible booking |
+| GET | `/bookings/provider` | Retrieve provider bookings |
+| PATCH | `/bookings/approve/:id` | Approve a booking |
+| PATCH | `/bookings/reject/:id` | Reject a booking |
+| GET | `/bookings/:id` | Retrieve booking details |
 
 ### Caregiver APIs
 
-```text
-GET    /caregivers
-GET    /caregivers/provider
-POST   /caregivers
-PUT    /caregivers/:id
-DELETE /caregivers/:id
-GET    /caregivers/:id
-```
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/caregivers` | Retrieve caregivers |
+| GET | `/caregivers/provider` | Retrieve provider caregivers |
+| POST | `/caregivers` | Create a caregiver |
+| PUT | `/caregivers/:id` | Update a caregiver |
+| DELETE | `/caregivers/:id` | Delete a caregiver |
+| GET | `/caregivers/:id` | Retrieve caregiver details |
 
 ### Admin APIs
 
-The admin service includes dashboard, user, provider, center, booking, subscription, payment, and reporting operations.
+The administrative service includes operations for dashboard statistics, users, providers, centers, bookings, subscriptions, and reports.
 
-Examples include:
+Example endpoints:
 
-```text
+```http
 GET   /admin/dashboard
 GET   /admin/users
 GET   /admin/users/:id
@@ -447,64 +492,69 @@ GET   /admin/providers
 GET   /admin/centers
 GET   /admin/bookings
 GET   /admin/subscriptions
-GET   /admin/payments
 ```
 
-All admin operations are protected by authentication and admin-role middleware.
+Administrative operations are intended to be protected by authentication and administrator-role authorization.
 
 ---
 
-## 💰 Booking Amount Calculation
+## 12. Database Models
 
-The booking controller calculates the amount based on the selected plan:
+The backend uses Mongoose models to organize application data.
 
-```text
-Hourly  → monthlyFee / 160
-Daily   → monthlyFee / 30
-Monthly → monthlyFee
-```
+The primary models listed in the supplied project documentation are:
 
-The calculated amount is stored with the booking and later used by the payment flow.
+| Model | Purpose |
+|---|---|
+| User | Stores user account information and roles |
+| Provider | Stores childcare provider information |
+| Center | Stores childcare center details |
+| Caregiver | Stores caregiver information |
+| Booking | Stores childcare booking information |
+| Subscription | Stores subscription information |
+
+### User Roles
+
+The User model supports:
+
+- `parent`
+- `provider`
+- `admin`
+
+### Account States
+
+The supplied documentation identifies the following account states:
+
+- `active`
+- `blocked`
+- `pending`
+
+### Subscription Information
+
+The supplied subscription documentation identifies these subscription statuses:
+
+- Pending
+- Active
+- Expired
+- Cancelled
+
+Subscription plan durations described in the existing documentation include:
+
+- Monthly
+- Quarterly
+- Yearly
 
 ---
 
-## 💳 Payment Verification
+## 13. Environment Variables
 
-The backend verifies Razorpay payments using the Razorpay order ID, payment ID, and signature.
-
-The verification process uses an HMAC SHA-256 signature generated from:
-
-```text
-razorpay_order_id|razorpay_payment_id
-```
-
-A successfully verified payment is marked:
-
-```text
-Success
-```
-
-For booking payments, the related booking is updated to:
-
-```text
-Paid
-```
-
-For subscription payments, the supplied implementation creates an active subscription record after successful verification.
-
----
-
-## ⚙️ Environment Variables
+Environment variables should be configured separately for the backend and frontend.
 
 ### Backend
 
-Create:
+Create a `.env` file inside the `backend/` directory.
 
-```text
-backend/.env
-```
-
-The supplied `.env.example` contains these variables:
+The supplied `.env.example` identifies the following configuration variables:
 
 ```env
 PORT=
@@ -521,88 +571,87 @@ CLIENT_URL=
 ADMIN_URL=
 ```
 
-The payment implementation additionally reads Razorpay credentials:
-
-```env
-RAZORPAY_KEY_ID=
-RAZORPAY_KEY_SECRET=
-```
-
-> Never commit real secrets, API keys, database credentials, JWT secrets, or Razorpay secret keys to Git.
-
 ### Frontend
 
-Create:
+Create a `.env` file inside the `frontend/` directory.
 
-```text
-frontend/.env
-```
-
-The supplied frontend configuration uses:
+Configure the backend API URL:
 
 ```env
-VITE_API_URL=https://little-steps-trusted-24-7-childcare.vercel.app/api
-VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+VITE_API_URL=<backend-api-url>/api
 ```
 
-For local development, `VITE_API_URL` should point to the local backend API.
+For local development, configure this variable to point to the locally running backend API.
+
+**Security reminder:** Never commit real environment variables, database credentials, JWT secrets, or Cloudinary API secrets to Git.
 
 ---
 
-## 🚀 Installation & Local Development
+## 14. Installation and Local Development
 
-### 1. Clone the repository
+### Prerequisites
+
+Install the following before running the application:
+
+- Node.js.
+- npm.
+- MongoDB connection.
+- Cloudinary account and credentials for supported media uploads.
+
+### Step 1: Clone the Repository
 
 ```bash
 git clone <your-repository-url>
 cd Little-Steps-Trusted-24-7-Childcare-Platform
 ```
 
-### 2. Backend setup
+### Step 2: Backend Setup
+
+Navigate to the backend directory:
 
 ```bash
 cd backend
 npm install
 ```
 
-Create `backend/.env` and configure MongoDB, JWT, Cloudinary, Razorpay, and client/admin URLs.
+Create `backend/.env` and configure the required environment variables.
 
-Start the development server:
+Start the backend development server:
 
 ```bash
 npm run dev
 ```
 
-The backend package provides:
+The backend package also provides:
 
 ```bash
-npm run dev
 npm start
 ```
 
-### 3. Frontend setup
+### Step 3: Frontend Setup
 
-Open another terminal:
+Open another terminal and navigate to the frontend directory:
 
 ```bash
 cd frontend
 npm install
 ```
 
-Configure:
+Configure the frontend environment:
 
 ```env
 VITE_API_URL=<backend-api-url>/api
-VITE_RAZORPAY_KEY_ID=<razorpay-key-id>
 ```
 
-Start Vite:
+Start the frontend development server:
 
 ```bash
 npm run dev
 ```
 
-Build for production:
+### Step 4: Production Build
+
+Build the frontend:
 
 ```bash
 npm run build
@@ -622,35 +671,25 @@ npm run lint
 
 ---
 
-## ☁️ Deployment
+## 15. Deployment
 
 ### Backend
 
-The supplied backend contains a Vercel configuration:
+The supplied backend project includes a Vercel configuration.
 
-```json
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "src/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.js"
-    }
-  ]
-}
+The configuration identifies the backend entry point as:
+
+```text
+src/index.js
 ```
 
-The backend `src/index.js` initializes the database connection for the serverless request handler.
+The backend entry point initializes the database connection for the serverless request handler.
 
 ### Frontend
 
-The frontend is configured as a Vite application and can be deployed to a static hosting platform supporting Vite builds.
+The frontend is configured as a Vite application.
+
+It can be deployed to a static hosting platform that supports Vite production builds.
 
 Production build command:
 
@@ -664,310 +703,241 @@ Output directory:
 dist/
 ```
 
----
-
-## 🗄️ Database Models
-
-The backend contains these primary Mongoose models:
-
-```text
-User
-Provider
-Center
-Caregiver
-Booking
-Subscription
-Payment
-```
-
-### User
-
-Supported roles:
-
-```text
-parent
-provider
-admin
-```
-
-Supported account states:
-
-```text
-active
-blocked
-pending
-```
-
-### Subscription
-
-Supported subscription statuses:
-
-```text
-Pending
-Active
-Expired
-Cancelled
-```
-
-The supplied subscription model supports:
-
-```text
-Monthly
-Quarterly
-Yearly
-```
+The frontend must be configured with the correct deployed backend API URL.
 
 ---
 
-## 🎨 UI & Design System
+## 16. UI and Design System
 
-The frontend uses a warm childcare-oriented visual language.
+The frontend uses a warm, childcare-oriented visual style.
 
-Primary theme values in the supplied stylesheet include:
+The supplied stylesheet identifies the following primary theme values:
 
-```text
-Primary:   #FF9500
-Secondary: #FFAA00
-Accent:    #FFC300
-```
+| Theme Element | Color |
+|---|---|
+| Primary | `#FF9500` |
+| Secondary | `#FFAA00` |
+| Accent | `#FFC300` |
 
 The application also supports a dark theme.
 
-The frontend uses:
+The documented interface elements include:
 
-- Rounded cards
-- Responsive layouts
-- Animated sections
-- Toast notifications
-- Responsive dashboards
-- Modal/dialog interfaces
-- Search/filter interfaces
-- Charts for administrative reporting
-
----
-
-# 📸 Screenshots
-
-## Landing Page
-
-![Landing Page](https://res.cloudinary.com/drwflyyk/image/upload/v1786779327/screencapture-little-steps-trusted-24-7-childcare-onrender-2026-08-14-23_47_16.png)
+- Rounded cards.
+- Responsive layouts.
+- Animated sections.
+- Toast notifications.
+- Responsive dashboards.
+- Modal and dialog interfaces.
+- Search and filter interfaces.
+- Administrative charts and reporting components.
 
 ---
 
-## 🔐 Authentication
+## 17. Functional Requirements and Future Development
 
-### Parent Registration / Login
+The original Product Requirements Document (PRD) describes the broader intended scope of Little Steps.
 
-![Parent Login](https://res.cloudinary.com/drwflyyk/image/upload/v1786779296/parent-Login-page.png)
+The following requirements should be treated as planned capabilities unless their implementation has been separately verified.
 
-### Provider Registration
+### Parent-Side Requirements
 
-![Provider Registration](https://res.cloudinary.com/drwflyyk/image/upload/v1786779298/Provider-register.png)
+- Search for nearby daycare and crèche centers.
+- Filter by availability, age group, timings, pricing, and plans.
+- View center photos, infrastructure, caregiver profiles, safety measures, and certifications.
+- Support hourly, daily, and monthly childcare booking arrangements.
+- Receive booking-related notifications.
+- View booking history.
 
-### Login
+### Provider-Side Requirements
 
-![Login](https://res.cloudinary.com/drwflyyk/image/upload/v1786779295/Login-page.png)
+- Manage center operating hours and availability.
+- Manage caregiver profiles and center information.
+- Configure hourly, daily, and monthly pricing plans.
+- Manage center capacity and schedules.
+- Review booking requests.
+- View earnings and booking analytics.
 
----
+### Admin-Side Requirements
 
-# 👨‍👩‍👧 Parent Screens
+- Review provider and parent information.
+- Verify submitted documents and certifications.
+- Manage service categories and age groups.
+- Monitor bookings and disputes.
+- Manage platform content and safety policies.
+- View platform analytics and reports.
 
-### Parent Dashboard
+### Additional Planned Capabilities
 
-![Parent Dashboard](https://res.cloudinary.com/drwflyyk/image/upload/v1786777974/Parents-Dashboard.png)
-
-### My Bookings
-
-![Parent Bookings](https://res.cloudinary.com/drwflyyk/image/upload/v1786777973/Parents-bookings.png)
-
-### Browse Centers
-
-![Browse Centers](https://res.cloudinary.com/drwflyyk/image/upload/v1786777976/Parents-Browsing_centers.png)
-
-### Center Details
-
-![Center Details](https://res.cloudinary.com/drwflyyk/image/upload/v1786777978/Centers-details.png)
-
-### Booking Form
-
-![Booking Now](https://res.cloudinary.com/drwflyyk/image/upload/v1786778822/Parents-booking-now.jpg)
-
----
-
-# 💳 Parent Payment Flow
-
-### Pay Now
-
-![Pay Now](https://res.cloudinary.com/drwflyyk/image/upload/v1786778793/0_My-booking-paynow_button.jpg)
-
-### Razorpay Checkout
-
-![Razorpay Payment](https://res.cloudinary.com/drwflyyk/image/upload/v1786778793/1_Razorpay-payments.jpg)
-
-### OTP
-
-![Payment OTP](https://res.cloudinary.com/drwflyyk/image/upload/v1786778793/2_otp.jpg)
-
-### Bank Acceptance
-
-![Bank Acceptance](https://res.cloudinary.com/drwflyyk/image/upload/v1786778794/3_accepts.jpg)
-
-### Payment Confirmation
-
-![Payment Confirmation](https://res.cloudinary.com/drwflyyk/image/upload/v1786778795/4_success.jpg)
-
-### Successful Payment
-
-![Payment Success](https://res.cloudinary.com/drwflyyk/image/upload/v1786778797/5_payments_-success-and_paid.jpg)
+- Advanced childcare search and filtering.
+- More detailed safety and verification workflows.
+- Improved availability tracking.
+- Expanded notifications.
+- Multi-city support.
 
 ---
 
-# 🏢 Provider Screens
+## 18. Non-Functional Requirements
 
-### Provider Dashboard
+The original PRD identifies the following non-functional requirements.
 
-![Provider Dashboard](https://res.cloudinary.com/drwflyyk/image/upload/v1786778048/Providers-dashboards.png)
+### Performance
 
-### My Centers
+- Target page load time under three seconds.
 
-![Provider Centers](https://res.cloudinary.com/drwflyyk/image/upload/v1786778045/My-centers.png)
+### Security
 
-### Caregivers
+- Secure authentication.
+- Encrypted data.
+- Role-based access control.
+- Protected application routes.
 
-![Provider Caregivers](https://res.cloudinary.com/drwflyyk/image/upload/v1786778047/Providers-Caregvers-table.png)
+### Usability
 
-### Caregiver Details
+- Simple and parent-friendly interface.
+- Responsive, mobile-first design.
+- Easy navigation.
 
-![Caregiver Details](https://res.cloudinary.com/drwflyyk/image/upload/v1786778044/Caregivers-details.png)
+### Reliability
 
-### Parent Bookings
+- Accurate availability management.
+- Reduced risk of booking conflicts and overbooking.
 
-![Provider Bookings](https://res.cloudinary.com/drwflyyk/image/upload/v1786778043/Bookings.png)
+### Scalability
 
-### Booking Details
+- Modular application architecture.
+- Support for future expansion across multiple cities and regions.
 
-![Provider Booking Details](https://res.cloudinary.com/drwflyyk/image/upload/v1786778042/Booking-details.png)
-
----
-
-# 🛡️ Admin Screens
-
-### Admin Dashboard
-
-![Admin Dashboard](https://res.cloudinary.com/drwflyyk/image/upload/v1786779191/Admin-dashboard.png)
-
-### Users
-
-![Admin Users](https://res.cloudinary.com/drwflyyk/image/upload/v1786779192/admin-user-dashboard.png)
-
-### Providers
-
-![Admin Providers](https://res.cloudinary.com/drwflyyk/image/upload/v1786779191/Admin-provider-dashboard.png)
-
-### Centers
-
-![Admin Centers](https://res.cloudinary.com/drwflyyk/image/upload/v1786779189/Admin-centers-dashboard.png)
-
-### Center Bookings
-
-![Admin Center Bookings](https://res.cloudinary.com/drwflyyk/image/upload/v1786779189/Admin-centers-booking.png)
-
-### Payments
-
-![Admin Payments](https://res.cloudinary.com/drwflyyk/image/upload/v1786779193/Admin-user-payments.png)
+*These are project requirements and targets, not claims that every target has already been measured or achieved.*
 
 ---
 
-## 🧪 Testing Checklist
+## 19. Testing Checklist
 
-Before deployment, verify the following:
+The following checklist can be used to verify the application.
 
 ### Authentication
 
-- [ ] Parent registration works
-- [ ] Provider registration works
-- [ ] Login works
-- [ ] Logout works
-- [ ] Protected routes reject unauthenticated requests
-- [ ] Blocked users cannot access protected functionality
-- [ ] Pending providers cannot access provider functionality before approval
+- [ ] Parent registration works.
+- [ ] Provider registration works.
+- [ ] Login works.
+- [ ] Logout works.
+- [ ] Protected routes reject unauthenticated requests.
+- [ ] Blocked users cannot access protected functionality.
+- [ ] Pending providers cannot access restricted provider functionality before approval.
 
 ### Parent
 
-- [ ] Centers load correctly
-- [ ] Center details load correctly
-- [ ] Caregivers load correctly
-- [ ] Booking creation works
-- [ ] Booking cancellation works
-- [ ] Payment flow works
-- [ ] Payment verification works
-- [ ] Subscription flow works
+- [ ] Childcare centers load correctly.
+- [ ] Center details load correctly.
+- [ ] Caregiver information loads correctly.
+- [ ] Booking creation works.
+- [ ] Booking cancellation works for eligible bookings.
+- [ ] Booking history loads correctly.
+- [ ] Subscription information loads correctly.
 
 ### Provider
 
-- [ ] Provider dashboard loads
-- [ ] Center creation works
-- [ ] Center update/delete works
-- [ ] Caregiver creation works
-- [ ] Caregiver image upload works
-- [ ] Caregiver update/delete works
-- [ ] Booking approval works
-- [ ] Booking rejection works
+- [ ] Provider dashboard loads.
+- [ ] Center creation works.
+- [ ] Center update and deletion work.
+- [ ] Caregiver creation works.
+- [ ] Caregiver image upload works.
+- [ ] Caregiver update and deletion work.
+- [ ] Booking approval works.
+- [ ] Booking rejection works.
 
 ### Admin
 
-- [ ] Dashboard statistics load
-- [ ] Users can be viewed
-- [ ] User status can be updated
-- [ ] Providers can be approved/rejected
-- [ ] Centers can be viewed
-- [ ] Center status can be updated
-- [ ] Bookings can be viewed
-- [ ] Subscriptions can be viewed
-- [ ] Payments can be viewed
-- [ ] Reports load correctly
+- [ ] Dashboard statistics load.
+- [ ] Users can be viewed.
+- [ ] User status can be updated.
+- [ ] Providers can be approved or rejected.
+- [ ] Centers can be viewed.
+- [ ] Center status can be updated.
+- [ ] Bookings can be viewed.
+- [ ] Subscriptions can be viewed.
+- [ ] Reports load correctly.
 
 ### Deployment
 
-- [ ] Environment variables configured
-- [ ] MongoDB connection works
-- [ ] Cloudinary credentials configured
-- [ ] Razorpay credentials configured
-- [ ] Frontend API URL configured
-- [ ] CORS origins configured
-- [ ] Production cookies work with HTTPS
-- [ ] Production payment verification works
+- [ ] Environment variables are configured.
+- [ ] MongoDB connection works.
+- [ ] Cloudinary credentials are configured.
+- [ ] Frontend API URL is correct.
+- [ ] CORS origins are configured.
+- [ ] Production authentication cookies work over HTTPS.
 
 ---
 
-## 🔐 Security Notes
+## 20. Security Notes
 
 - Do not commit `.env` files.
 - Keep `JWT_SECRET` private.
-- Keep `RAZORPAY_KEY_SECRET` private.
 - Keep Cloudinary API secrets private.
 - Use HTTPS in production.
 - Keep authentication cookies HTTP-only.
 - Configure production CORS with trusted origins.
 - Never expose backend secrets through frontend `VITE_*` variables.
-
-Only public client-side values such as a Razorpay key ID should be exposed to the frontend.
-
----
-
-## 📝 Important Source-Code Notes
-
-This README is based on the supplied project source material and screenshots. It intentionally does not invent deployment credentials, administrator email addresses, administrator passwords, database credentials, or API secrets because those values were not provided as verified project information.
-
-The source contains some naming inconsistencies/typos in existing files (for example, `cloudinaryUplaod.js` and some historical route/status code). This README documents the supplied implementation rather than silently modifying or correcting the source code.
+- Restrict protected operations through authentication and role-based authorization.
 
 ---
 
-## 👨‍💻 Author
+## 21. Assumptions and Constraints
 
-**md abdul bari**
+### Assumptions
 
-Repository/project name:
+- Childcare providers will share valid information and documents.
+- Parents may prefer convenient digital childcare discovery and booking.
+- Stakeholder feedback will be available during development.
+- Childcare providers will maintain accurate center and caregiver information.
+
+### Constraints
+
+- Compliance with applicable childcare safety regulations.
+- Fixed development timeline.
+- Limited scope during the initial development phase.
+- Dependence on third-party services for selected application functionality.
+
+---
+
+## 22. Future Enhancements
+
+The original PRD identifies the following possible future improvements:
+
+- Native Android and iOS applications.
+- Live CCTV access for parents.
+- Emergency medical support integration.
+- AI-based caregiver recommendations.
+- Online payment processing and refunds.
+- Expanded childcare discovery and filtering.
+- Improved provider analytics.
+- Additional city and regional support.
+
+Online payments and refunds are future enhancements and are not documented as currently implemented functionality.
+
+---
+
+## 23. Expected Impact
+
+Little Steps aims to contribute to a more organized and accessible childcare ecosystem by:
+
+- Improving access to childcare information.
+- Reducing the effort required to discover childcare services.
+- Supporting working parents and families with flexible schedules.
+- Helping childcare providers organize their operations.
+- Improving transparency in childcare service management.
+- Providing a foundation for a scalable childcare platform.
+
+---
+
+## 24. Author
+
+**Author:** Md Abdul Bari
+
+**Project Name:** Little Steps — Trusted 24×7 Childcare Platform
+
+**Repository Name:**
 
 ```text
 Little-Steps-Trusted-24-7-Childcare-Platform
@@ -975,36 +945,18 @@ Little-Steps-Trusted-24-7-Childcare-Platform
 
 ---
 
-## 📄 License
+## 25. License
 
 The supplied backend `package.json` identifies the project license as:
 
-```text
-ISC
-```
+**ISC License**
 
 ---
 
-## ⭐ Project Summary
+## 26. Project Summary
 
-**Little Steps — Trusted 24/7 Childcare Platform** combines childcare discovery, provider management, caregiver management, bookings, subscriptions, online payments, authentication, cloud image storage, and administrative reporting into one role-based web platform.
+Little Steps is a full-stack childcare management platform designed to bring parents, childcare providers, caregivers, and administrators together through a centralized web application.
 
-```text
-Parent
-  ↓
-Discover Center
-  ↓
-View Details
-  ↓
-Create Booking
-  ↓
-Provider Reviews Booking
-  ↓
-Booking Approved
-  ↓
-Razorpay Payment
-  ↓
-Payment Verification
-  ↓
-Booking / Subscription Updated
-```
+The project focuses on childcare discovery, provider and center management, caregiver information, booking workflows, subscription management, authentication, cloud-based media storage, and administrative operations.
+
+The platform is designed to provide a foundation for safer, more convenient, and more organized childcare service management while leaving advanced capabilities for future development.

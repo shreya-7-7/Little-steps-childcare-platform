@@ -9,6 +9,8 @@ import {
   Building2,
   MapPin,
   BadgeCheck,
+  Award,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -151,9 +153,13 @@ const CaregiverDetails = () => {
           <div className="flex flex-col gap-8 lg:flex-row">
             <div className="flex flex-col items-center">
               <img
-                src={caregiver.profileImage?.url || "/default-avatar.png"}
+                src={caregiver.profileImage?.url || "/default-avatar.svg"}
                 alt={caregiver.fullName}
-                className="h-52 w-52 rounded-[28px] border-4 border-orange-200 object-cover shadow-md"
+                className="h-52 w-52 rounded-[28px] border-4 border-orange-200 object-cover shadow-md bg-orange-50"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/default-avatar.svg";
+                }}
               />
 
               <Badge
@@ -269,6 +275,49 @@ const CaregiverDetails = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Professional Biography */}
+              {caregiver.bio && (
+                <div
+                  className="mt-6 rounded-2xl border p-6"
+                  style={{
+                    borderColor: colors.border,
+                  }}
+                >
+                  <div className="mb-2 flex items-center gap-2 text-orange-600 font-semibold text-sm">
+                    <User className="h-4 w-4" />
+                    <span>Professional Biography</span>
+                  </div>
+                  <p className="text-[15px] leading-relaxed" style={{ color: colors.textMuted }}>
+                    {caregiver.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* Certifications & Skills */}
+              {caregiver.certifications?.length > 0 && (
+                <div
+                  className="mt-6 rounded-2xl border p-6"
+                  style={{
+                    borderColor: colors.border,
+                  }}
+                >
+                  <div className="mb-3 flex items-center gap-2 text-orange-600 font-semibold text-sm">
+                    <Award className="h-4 w-4" />
+                    <span>Certifications & Specialized Skills</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {caregiver.certifications.map((cert, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center rounded-xl bg-orange-50 px-3.5 py-1.5 text-xs font-semibold text-orange-700 border border-orange-200"
+                      >
+                        {cert}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

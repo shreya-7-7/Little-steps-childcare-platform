@@ -4,7 +4,7 @@ import useAuth from "../../hooks/useAuth";
 
 import UserMenu from "../common/UserMenu";
 import NotificationBell from "./NotificationBell";
-import { Sun, Moon, Menu, X, PhoneCall } from "lucide-react";
+import { Sun, Moon, Menu, X } from "lucide-react";
 
 import { useTheme } from "../../context/ThemeContext";
 import LogoMark from "./LogoMark";
@@ -16,6 +16,29 @@ export default function Navbar({ onSidebarOpen }) {
 
   const links = ["About", "Services", "How it works", "Centers", "FAQ"];
   const { user } = useAuth();
+
+  const handleNavClick = (e, hashId) => {
+    if (typeof window !== "undefined" && window.location.pathname === "/") {
+      const el = document.getElementById(hashId);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", `#${hashId}`);
+      }
+    }
+  };
+
+  const handleLogoClick = (e) => {
+    if (typeof window !== "undefined" && window.location.pathname === "/") {
+      const el = document.getElementById("top");
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", "#top");
+      }
+    }
+  };
+
   return (
     <header
       className="sticky top-0 z-50 backdrop-blur"
@@ -26,7 +49,8 @@ export default function Navbar({ onSidebarOpen }) {
     >
       <div className="max-w-6xl mx-auto px-5 sm:px-8 flex items-center justify-between h-16">
         <a
-          href="#top"
+          href="/#top"
+          onClick={handleLogoClick}
           className="flex items-center gap-2 font-bold text-lg"
           style={{
             color: colors.text,
@@ -38,16 +62,20 @@ export default function Navbar({ onSidebarOpen }) {
         </a>
 
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
-          {links.map((l) => (
-            <a
-              key={l}
-              href={`#${l.toLowerCase().replace(/\s+/g, "-")}`}
-              className="hover:opacity-70 transition-opacity"
-              style={{ color: colors.text }}
-            >
-              {l}
-            </a>
-          ))}
+          {links.map((l) => {
+            const hashId = l.toLowerCase().replace(/\s+/g, "-");
+            return (
+              <a
+                key={l}
+                href={`/#${hashId}`}
+                onClick={(e) => handleNavClick(e, hashId)}
+                className="hover:opacity-70 transition-opacity"
+                style={{ color: colors.text }}
+              >
+                {l}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -108,26 +136,32 @@ export default function Navbar({ onSidebarOpen }) {
             borderTop: `1px solid ${colors.border}`,
           }}
         >
-          {links.map((l) => (
-            <a
-              key={l}
-              href={`#${l.toLowerCase().replace(/\s+/g, "-")}`}
-              onClick={() => setOpen(false)}
-              style={{ color: colors.text }}
-              className="text-sm font-medium pt-4"
-            >
-              {l}
-            </a>
-          ))}
+          {links.map((l) => {
+            const hashId = l.toLowerCase().replace(/\s+/g, "-");
+            return (
+              <a
+                key={l}
+                href={`/#${hashId}`}
+                onClick={(e) => {
+                  setOpen(false);
+                  handleNavClick(e, hashId);
+                }}
+                style={{ color: colors.text }}
+                className="text-sm font-medium pt-4"
+              >
+                {l}
+              </a>
+            );
+          })}
 
           {!user ? (
             <>
               <Button variant="secondary" className="w-full mt-1" asChild>
-                <Link to="/login">Login</Link>
+                <Link to="/login" onClick={() => setOpen(false)}>Login</Link>
               </Button>
 
               <Button variant="primary" className="w-full" asChild>
-                <Link to="/register">Register</Link>
+                <Link to="/register" onClick={() => setOpen(false)}>Register</Link>
               </Button>
             </>
           ) : (

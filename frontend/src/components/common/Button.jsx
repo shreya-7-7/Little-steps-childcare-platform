@@ -1,3 +1,4 @@
+import React from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { brand } from "../data/theme";
 
@@ -6,6 +7,7 @@ export default function Button({
   variant = "primary",
   icon: Icon,
   className = "",
+  asChild = false,
   ...props
 }) {
   const { colors } = useTheme();
@@ -25,6 +27,20 @@ export default function Button({
           color: colors.text,
           border: `1.5px solid ${colors.border}`,
         };
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      ...props,
+      className: `${base} ${className} ${children.props.className || ""}`.trim(),
+      style: { ...style, ...children.props.style },
+      children: (
+        <>
+          {children.props.children}
+          {Icon && <Icon className="w-4 h-4" />}
+        </>
+      ),
+    });
+  }
 
   return (
     <button className={`${base} ${className}`} style={style} {...props}>

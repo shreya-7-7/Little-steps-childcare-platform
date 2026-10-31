@@ -20,18 +20,22 @@ import { useTheme } from "../../context/ThemeContext";
 
 import { getDashboardStats } from "@/services/providerService";
 
+let cachedStats = null;
+
 const DashboardHome = () => {
   const { colors } = useTheme();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(cachedStats);
+  const [loading, setLoading] = useState(!cachedStats);
 
   const fetchDashboard = async () => {
     try {
       const data = await getDashboardStats();
-
+      cachedStats = data.stats;
       setStats(data.stats);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load dashboard");
+      if (!cachedStats) {
+        toast.error(error.response?.data?.message || "Failed to load dashboard");
+      }
     } finally {
       setLoading(false);
     }
@@ -41,7 +45,7 @@ const DashboardHome = () => {
     fetchDashboard();
   }, []);
 
-  if (loading) {
+  if (loading && !stats) {
     return <Loading />;
   }
 

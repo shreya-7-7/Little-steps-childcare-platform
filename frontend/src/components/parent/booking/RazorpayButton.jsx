@@ -12,10 +12,12 @@ const RazorpayButton = ({ payload, buttonText = "Pay now", onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoOrderData, setDemoOrderData] = useState(null);
+  const [demoVerifyResult, setDemoVerifyResult] = useState(null);
 
   const handlePayment = async () => {
     const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
     const isDemoAllowed =
+      !razorpayKey ||
       import.meta.env.VITE_ALLOW_DEMO_PAYMENT === "true" ||
       import.meta.env.DEV;
 
@@ -33,9 +35,20 @@ const RazorpayButton = ({ payload, buttonText = "Pay now", onSuccess }) => {
         setDemoOrderData({
           orderId: data.order.id,
           amount: data.payment.amount,
-          centerName: data.payment.booking?.center?.centerName || "Childcare Centre",
+          centerName:
+            payload?.centerName ||
+            data.payment.booking?.center?.centerName ||
+            "Childcare Centre",
           childName: data.payment.booking?.childName || null,
+          isSubscription: Boolean(
+            payload?.planType || data.payment?.subscriptionData
+          ),
+          planType:
+            payload?.planType ||
+            data.payment?.subscriptionData?.planType ||
+            null,
         });
+        setDemoVerifyResult(null);
         setDemoModalOpen(true);
         setIsProcessing(false);
         return;
@@ -104,7 +117,7 @@ const RazorpayButton = ({ payload, buttonText = "Pay now", onSuccess }) => {
       const res = await verifyDemoPayment({ orderId });
       toast.success(res.message || "Demo payment verified successfully");
       window.dispatchEvent(new Event("refresh-notifications"));
-      onSuccess?.(res);
+      setDemoVerifyResult(res);
       return res;
     } catch (error) {
       toast.error(
@@ -127,6 +140,14 @@ const RazorpayButton = ({ payload, buttonText = "Pay now", onSuccess }) => {
     }
   };
 
+  const handleModalOpenChange = (open) => {
+    setDemoModalOpen(open);
+    if (!open && demoVerifyResult) {
+      onSuccess?.(demoVerifyResult);
+      setDemoVerifyResult(null);
+    }
+  };
+
   return (
     <>
       <button
@@ -141,7 +162,7 @@ const RazorpayButton = ({ payload, buttonText = "Pay now", onSuccess }) => {
 
       <DemoPaymentModal
         open={demoModalOpen}
-        onOpenChange={setDemoModalOpen}
+        onOpenChange={handleModalOpenChange}
         orderData={demoOrderData}
         onSimulateSuccess={handleSimulateSuccess}
         onSimulateFailure={handleSimulateFailure}

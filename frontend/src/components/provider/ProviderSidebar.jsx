@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -9,46 +10,81 @@ import {
   CalendarCheck,
   User,
   X,
+  Pencil,
 } from "lucide-react";
 
 import LogoMark from "../common/LogoMark";
 import { useTheme } from "../../context/ThemeContext";
+import { getMyCenters } from "../../services/centerService";
 
-const menus = [
-  {
-    name: "Dashboard",
-    path: "/provider/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Create Center",
-    path: "/provider/center/create",
-    icon: PlusCircle,
-  },
-  {
-    name: "My Center",
-    path: "/provider/center",
-    icon: Building2,
-  },
-  {
-    name: "Caregivers",
-    path: "/provider/caregivers",
-    icon: Users,
-  },
-  {
-    name: "Bookings",
-    path: "/provider/bookings",
-    icon: CalendarCheck,
-  },
-  {
-    name: "Profile",
-    path: "/provider/profile",
-    icon: User,
-  },
-];
+
+
+let cachedCenterData = null;
 
 const ProviderSidebar = ({ mobileOpen, onClose }) => {
   const { colors } = useTheme();
+  const [centerId, setCenterId] = useState(cachedCenterData?._id || null);
+
+  useEffect(() => {
+    if (!cachedCenterData) {
+      getMyCenters()
+        .then((res) => {
+          if (res.centers?.length > 0) {
+            cachedCenterData = res.centers[0];
+            setCenterId(res.centers[0]._id);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  const menus = [
+    {
+      name: "Dashboard",
+      path: "/provider/dashboard",
+      icon: LayoutDashboard,
+    },
+    ...(centerId
+      ? [
+          {
+            name: "My Center",
+            path: "/provider/center",
+            icon: Building2,
+          },
+          {
+            name: "Edit Center",
+            path: `/provider/center/edit/${centerId}`,
+            icon: Pencil,
+          },
+        ]
+      : [
+          {
+            name: "Create Center",
+            path: "/provider/center/create",
+            icon: PlusCircle,
+          },
+          {
+            name: "My Center",
+            path: "/provider/center",
+            icon: Building2,
+          },
+        ]),
+    {
+      name: "Caregivers",
+      path: "/provider/caregivers",
+      icon: Users,
+    },
+    {
+      name: "Bookings",
+      path: "/provider/bookings",
+      icon: CalendarCheck,
+    },
+    {
+      name: "Profile",
+      path: "/provider/profile",
+      icon: User,
+    },
+  ];
 
   return (
     <>

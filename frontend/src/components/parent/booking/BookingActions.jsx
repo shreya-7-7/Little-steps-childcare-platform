@@ -35,7 +35,16 @@ const BookingActions = ({ booking, refreshBooking }) => {
 
   return (
     <div className="flex flex-wrap gap-3">
-      {canPay && <RazorpayButton payload={{ bookingId: booking._id }} />}
+      {canPay && (
+        <RazorpayButton
+          payload={{
+            bookingId: booking._id,
+            centerName: booking.center?.centerName || "Childcare Centre",
+            childName: booking.childName,
+          }}
+          onSuccess={refreshBooking}
+        />
+      )}
       {isPending && (
         <Button
           variant="destructive"

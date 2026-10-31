@@ -33,6 +33,19 @@ const caregiverSchema = new mongoose.Schema(
       trim: true,
     },
 
+    bio: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    certifications: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
     profileImage: {
       url: {
         type: String,

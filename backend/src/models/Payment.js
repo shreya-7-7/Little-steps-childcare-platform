@@ -54,6 +54,17 @@ const paymentSchema = new mongoose.Schema(
 
       planType: String,
 
+      tier: {
+        type: String,
+        default: null,
+      },
+
+      benefits: [
+        {
+          type: String,
+        },
+      ],
+
       startDate: Date,
 
       endDate: Date,

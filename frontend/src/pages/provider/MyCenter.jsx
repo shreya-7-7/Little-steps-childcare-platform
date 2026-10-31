@@ -8,6 +8,7 @@ import {
   Search,
   Users,
   IndianRupee,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,32 +21,39 @@ import { Input } from "@/components/ui/input";
 
 import { useTheme } from "../../context/ThemeContext";
 
+let cachedCenters = null;
+
 const MyCenter = () => {
   const { colors } = useTheme();
 
-  const [centers, setCenters] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [centers, setCenters] = useState(cachedCenters || []);
+  const [loading, setLoading] = useState(!cachedCenters);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchCenters();
-  }, []);
-
-  const fetchCenters = async () => {
+  const fetchCenters = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent && !cachedCenters) {
+        setLoading(true);
+      }
 
       const response = await getMyCenters();
-
-      setCenters(response.centers || []);
+      const list = response.centers || [];
+      cachedCenters = list;
+      setCenters(list);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to load childcare centers.",
-      );
+      if (!cachedCenters) {
+        toast.error(
+          error.response?.data?.message || "Failed to load childcare centers.",
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCenters(Boolean(cachedCenters));
+  }, []);
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
@@ -86,7 +94,7 @@ const MyCenter = () => {
         )
       : 0;
 
-  if (loading) {
+  if (loading && !centers.length) {
     return <Loading />;
   }
 
@@ -116,12 +124,21 @@ const MyCenter = () => {
           </p>
         </div>
 
-        <Link to="/provider/create-center">
-          <Button size="lg">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Center
-          </Button>
-        </Link>
+        {centers.length > 0 ? (
+          <Link to={`/provider/center/edit/${centers[0]._id}`}>
+            <Button size="lg">
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit Center
+            </Button>
+          </Link>
+        ) : (
+          <Link to="/provider/center/create">
+            <Button size="lg">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Center
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Stats */}
@@ -257,7 +274,7 @@ const MyCenter = () => {
           </p>
 
           {!search && (
-            <Link to="/provider/create-center">
+            <Link to="/provider/center/create">
               <Button className="mt-8" size="lg">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Center

@@ -12,30 +12,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "../../components/ui/button";
 import { useTheme } from "../../context/ThemeContext";
 
+let cachedCaregivers = null;
+
 const Caregivers = () => {
   const { colors } = useTheme();
 
-  const [caregivers, setCaregivers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [caregivers, setCaregivers] = useState(cachedCaregivers || []);
+  const [loading, setLoading] = useState(!cachedCaregivers);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchCaregivers();
-  }, []);
-
-  const fetchCaregivers = async () => {
+  const fetchCaregivers = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent && !cachedCaregivers) {
+        setLoading(true);
+      }
 
       const response = await getProviderCaregivers();
-
-      setCaregivers(response.caregivers || []);
+      const list = response.caregivers || [];
+      cachedCaregivers = list;
+      setCaregivers(list);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load caregivers");
+      if (!cachedCaregivers) {
+        toast.error(error.response?.data?.message || "Failed to load caregivers");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCaregivers(Boolean(cachedCaregivers));
+  }, []);
 
   const filteredCaregivers = useMemo(() => {
     return caregivers.filter((caregiver) =>
@@ -43,7 +50,7 @@ const Caregivers = () => {
     );
   }, [caregivers, search]);
 
-  if (loading) {
+  if (loading && !caregivers.length) {
     return <Loading />;
   }
 

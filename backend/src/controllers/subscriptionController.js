@@ -2,20 +2,19 @@ import Subscription from "../models/Subscription.js";
 import Center from "../models/Center.js";
 import Provider from "../models/Provider.js";
 import { processSubscriptionExpirations } from "../utils/subscriptionExpiryHelper.js";
+import {
+  calculatePackagePrice,
+  getPackageBenefits,
+  isValidTier,
+  isValidPlanType,
+  SUBSCRIPTION_TIERS,
+  TIER_BENEFITS,
+} from "../config/subscriptionPackages.js";
 
-// Helper: Calculate authoritative subscription amount
-const calculateSubscriptionAmount = (center, planType) => {
+// Helper: Calculate authoritative subscription amount with tier support
+const calculateSubscriptionAmount = (center, planType, tier = null) => {
   const baseMonthly = Number(center.monthlyFee) || 0;
-  switch (planType) {
-    case "Monthly":
-      return baseMonthly;
-    case "Quarterly":
-      return baseMonthly * 3;
-    case "Yearly":
-      return baseMonthly * 12;
-    default:
-      return baseMonthly;
-  }
+  return calculatePackagePrice(baseMonthly, planType, tier);
 };
 
 // Helper: Calculate authoritative end date from start date
@@ -39,7 +38,7 @@ const calculateEndDate = (startDate, planType) => {
 
 const createSubscription = async (req, res) => {
   try {
-    const { center, planType, startDate, endDate } = req.body;
+    const { center, planType, tier, startDate, endDate } = req.body;
 
     // 1. Validate Required Fields
     if (!center || !planType || !startDate) {
@@ -50,11 +49,18 @@ const createSubscription = async (req, res) => {
     }
 
     // 2. Validate Supported Plan Type
-    const validPlanTypes = ["Monthly", "Quarterly", "Yearly"];
-    if (!validPlanTypes.includes(planType)) {
+    if (!isValidPlanType(planType)) {
       return res.status(400).json({
         success: false,
         message: "Invalid plan type. Must be Monthly, Quarterly, or Yearly.",
+      });
+    }
+
+    // 2b. Validate Tier if provided
+    if (tier && !isValidTier(tier)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid package tier. Must be Basic, Standard, or Premium.",
       });
     }
 
@@ -93,8 +99,9 @@ const createSubscription = async (req, res) => {
       });
     }
 
-    // 5. Authoritative Pricing & Date Calculation (Never trust client-supplied amount)
-    const authoritativeAmount = calculateSubscriptionAmount(centerExists, planType);
+    // 5. Authoritative Pricing & Date Calculation (Never trust client-supplied amount or benefits)
+    const authoritativeAmount = calculateSubscriptionAmount(centerExists, planType, tier || null);
+    const verifiedBenefits = getPackageBenefits(tier || null);
     const authoritativeEndDate = endDate && !isNaN(new Date(endDate).getTime())
       ? new Date(endDate)
       : calculateEndDate(parsedStartDate, planType);
@@ -110,6 +117,8 @@ const createSubscription = async (req, res) => {
     const subscription = await Subscription.create({
       parent: req.user._id,
       center: centerExists._id,
+      tier: tier || null,
+      benefits: verifiedBenefits,
       planType,
       startDate: parsedStartDate,
       endDate: authoritativeEndDate,

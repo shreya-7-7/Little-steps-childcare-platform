@@ -19,10 +19,34 @@ const AuthProvider = ({ children }) => {
   const fetchCurrentUser = async () => {
     try {
       const data = await getCurrentUser();
+      if (data?.token && typeof window !== "undefined") {
+        localStorage.setItem("token", data.token);
+        if (data.user?.role) {
+          localStorage.setItem(`token_${data.user.role}`, data.token);
+        }
+      }
+      if (data?.user && typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.user.role) {
+          localStorage.setItem(`user_${data.user.role}`, JSON.stringify(data.user));
+        }
+      }
       setUser(data.user);
     } catch (error) {
       if (typeof window !== "undefined") {
+        const pathname = window.location.pathname || "";
+        if (pathname.startsWith("/admin")) {
+          localStorage.removeItem("token_admin");
+          localStorage.removeItem("user_admin");
+        } else if (pathname.startsWith("/provider")) {
+          localStorage.removeItem("token_provider");
+          localStorage.removeItem("user_provider");
+        } else if (pathname.startsWith("/parent")) {
+          localStorage.removeItem("token_parent");
+          localStorage.removeItem("user_parent");
+        }
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
       setUser(null);
     } finally {
@@ -37,8 +61,15 @@ const AuthProvider = ({ children }) => {
     const data = await registerUser(userData);
     if (data?.token && typeof window !== "undefined") {
       localStorage.setItem("token", data.token);
+      if (data.user?.role) {
+        localStorage.setItem(`token_${data.user.role}`, data.token);
+      }
     }
     if (data?.user && data.user.role === "parent") {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user_parent", JSON.stringify(data.user));
+      }
       setUser(data.user);
     }
     return data;
@@ -52,6 +83,15 @@ const AuthProvider = ({ children }) => {
 
     if (data?.token && typeof window !== "undefined") {
       localStorage.setItem("token", data.token);
+      if (data.user?.role) {
+        localStorage.setItem(`token_${data.user.role}`, data.token);
+      }
+    }
+    if (data?.user && typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.user.role) {
+        localStorage.setItem(`user_${data.user.role}`, JSON.stringify(data.user));
+      }
     }
 
     setUser(data.user);
@@ -70,13 +110,24 @@ const AuthProvider = ({ children }) => {
       console.error("Logout error:", error);
     } finally {
       if (typeof window !== "undefined") {
+        if (user?.role) {
+          localStorage.removeItem(`token_${user.role}`);
+          localStorage.removeItem(`user_${user.role}`);
+        }
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
       setUser(null);
     }
   };
 
   const updateUser = (updatedUser) => {
+    if (updatedUser && typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      if (updatedUser.role) {
+        localStorage.setItem(`user_${updatedUser.role}`, JSON.stringify(updatedUser));
+      }
+    }
     setUser(updatedUser);
   };
 

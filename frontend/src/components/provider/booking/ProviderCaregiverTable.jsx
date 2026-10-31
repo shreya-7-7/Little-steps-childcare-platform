@@ -130,9 +130,13 @@ const ProviderCaregiverTable = ({ caregivers, onRefresh }) => {
                 <td className="px-8 py-6">
                   <div className="flex items-center gap-4">
                     <img
-                      src={caregiver.profileImage?.url || "/default-avatar.png"}
+                      src={caregiver.profileImage?.url || "/default-avatar.svg"}
                       alt={caregiver.fullName}
-                      className="h-16 w-16 rounded-2xl border-2 border-orange-200 object-cover shadow-sm"
+                      className="h-16 w-16 rounded-2xl border-2 border-orange-200 object-cover shadow-sm bg-orange-50"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/default-avatar.svg";
+                      }}
                     />
 
                     <div>
@@ -148,6 +152,15 @@ const ProviderCaregiverTable = ({ caregivers, onRefresh }) => {
                       {caregiver.specialization && (
                         <div className="mt-2 inline-flex rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-600">
                           {caregiver.specialization}
+                        </div>
+                      )}
+                      {caregiver.certifications?.length > 0 && (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {caregiver.certifications.slice(0, 2).map((cert, idx) => (
+                            <span key={idx} className="inline-flex rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 border border-blue-200">
+                              {cert}
+                            </span>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -243,9 +256,13 @@ const ProviderCaregiverTable = ({ caregivers, onRefresh }) => {
           >
             <div className="flex items-center gap-4">
               <img
-                src={caregiver.profileImage?.url || "/default-avatar.png"}
+                src={caregiver.profileImage?.url || "/default-avatar.svg"}
                 alt={caregiver.fullName}
-                className="h-16 w-16 rounded-2xl border-2 border-orange-200 object-cover"
+                className="h-16 w-16 rounded-2xl border-2 border-orange-200 object-cover bg-orange-50"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/default-avatar.svg";
+                }}
               />
 
               <div className="flex-1">

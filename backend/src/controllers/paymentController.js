@@ -1,3 +1,12 @@
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config();
+
 import { createInAppNotification } from "./notificationController.js";
 import razorpay from "../config/razorpay.js";
 import crypto from "crypto";
@@ -10,6 +19,12 @@ import Center from "../models/Center.js";
 import Provider from "../models/Provider.js";
 import User from "../models/User.js";
 import { runInTransaction } from "../utils/capacityHelper.js";
+import {
+  calculatePackagePrice,
+  getPackageBenefits,
+  isValidTier,
+  isValidPlanType,
+} from "../config/subscriptionPackages.js";
 
 /**
  * Safely verify Razorpay HMAC SHA256 signature in constant time.
@@ -52,12 +67,12 @@ export const verifyRazorpaySignature = (orderId, paymentId, signature, secret) =
 
 const createOrder = async (req, res) => {
   try {
-    const { bookingId, planType, center, startDate, endDate } = req.body;
+    const { bookingId, planType, tier, center, startDate, endDate } = req.body;
 
     // 1. Guard: Check Razorpay Initialization or Demo Mode Allowance
     const isDemoAllowed =
-      process.env.ALLOW_DEMO_PAYMENT === "true" &&
-      process.env.NODE_ENV !== "production";
+      process.env.NODE_ENV !== "production" &&
+      (process.env.ALLOW_DEMO_PAYMENT === "true" || !razorpay);
 
     if (!razorpay && !isDemoAllowed) {
       return res.status(503).json({
@@ -201,19 +216,22 @@ const createOrder = async (req, res) => {
         });
       }
 
-      // Authoritative subscription calculation
-      if (planType === "Monthly") {
-        amount = Number(centerData.monthlyFee);
-      } else if (planType === "Quarterly") {
-        amount = Number(centerData.monthlyFee) * 3;
-      } else if (planType === "Yearly") {
-        amount = Number(centerData.monthlyFee) * 12;
-      } else {
+      if (tier && !isValidTier(tier)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid package tier. Must be Basic, Standard, or Premium.",
+        });
+      }
+
+      if (!isValidPlanType(planType)) {
         return res.status(400).json({
           success: false,
           message: "Invalid plan type. Must be Monthly, Quarterly, or Yearly",
         });
       }
+
+      // Authoritative subscription calculation (never trust client amounts)
+      amount = calculatePackagePrice(centerData.monthlyFee, planType, tier || null);
 
       if (!amount || isNaN(amount) || amount <= 0) {
         return res.status(400).json({
@@ -247,6 +265,8 @@ const createOrder = async (req, res) => {
       paymentMethod = "Demo Simulation";
     }
 
+    const verifiedBenefits = planType ? getPackageBenefits(tier || null) : [];
+
     const payment = await Payment.create({
       parent: req.user._id,
       booking: bookingId || null,
@@ -255,6 +275,8 @@ const createOrder = async (req, res) => {
         ? {
             center,
             planType,
+            tier: tier || null,
+            benefits: verifiedBenefits,
             startDate: new Date(startDate),
             endDate: new Date(endDate),
           }
@@ -417,6 +439,8 @@ const verifyPayment = async (req, res) => {
             {
               parent: result.parent,
               center: result.subscriptionData.center,
+              tier: result.subscriptionData.tier || null,
+              benefits: result.subscriptionData.benefits || [],
               planType: result.subscriptionData.planType,
               startDate: result.subscriptionData.startDate,
               endDate: result.subscriptionData.endDate,
@@ -678,10 +702,11 @@ const getPaymentDetails = async (req, res) => {
 const verifyDemoPayment = async (req, res) => {
   try {
     // 1. Strict Environment Guard
-    if (
-      process.env.ALLOW_DEMO_PAYMENT !== "true" ||
-      process.env.NODE_ENV === "production"
-    ) {
+    const isDemoAllowed =
+      process.env.NODE_ENV !== "production" &&
+      (process.env.ALLOW_DEMO_PAYMENT === "true" || !razorpay);
+
+    if (!isDemoAllowed) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: Demo payments are disabled in production environments.",
@@ -764,6 +789,8 @@ const verifyDemoPayment = async (req, res) => {
             {
               parent: result.parent,
               center: result.subscriptionData.center,
+              tier: result.subscriptionData.tier || null,
+              benefits: result.subscriptionData.benefits || [],
               planType: result.subscriptionData.planType,
               startDate: result.subscriptionData.startDate,
               endDate: result.subscriptionData.endDate,
@@ -897,10 +924,11 @@ const verifyDemoPayment = async (req, res) => {
  */
 const failDemoPayment = async (req, res) => {
   try {
-    if (
-      process.env.ALLOW_DEMO_PAYMENT !== "true" ||
-      process.env.NODE_ENV === "production"
-    ) {
+    const isDemoAllowed =
+      process.env.NODE_ENV !== "production" &&
+      (process.env.ALLOW_DEMO_PAYMENT === "true" || !razorpay);
+
+    if (!isDemoAllowed) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: Demo payments are disabled in production environments.",

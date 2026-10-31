@@ -3,13 +3,23 @@ import User from "../models/User.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
-    let token = req.cookies?.token;
+    let token = null;
 
-    if (!token && req.headers.authorization) {
+    if (req.headers.authorization) {
       const parts = req.headers.authorization.split(" ");
-      if (parts.length === 2 && parts[0] === "Bearer") {
+      if (
+        parts.length === 2 &&
+        parts[0] === "Bearer" &&
+        parts[1] &&
+        parts[1] !== "null" &&
+        parts[1] !== "undefined"
+      ) {
         token = parts[1];
       }
+    }
+
+    if (!token && req.cookies?.token) {
+      token = req.cookies.token;
     }
 
     if (!token) {
@@ -21,7 +31,23 @@ const authMiddleware = async (req, res, next) => {
 
     const secret =
       process.env.JWT_SECRET || "little_steps_jwt_secret_dev_key_2026_super_secure";
-    const decoded = jwt.verify(token, secret);
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secret);
+    } catch (err) {
+      // If Bearer token was expired or invalid, fallback to cookie if present
+      if (req.cookies?.token && token !== req.cookies.token) {
+        try {
+          decoded = jwt.verify(req.cookies.token, secret);
+          token = req.cookies.token;
+        } catch {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
 
     const user = await User.findById(decoded.id).select("-password");
 
@@ -39,6 +65,7 @@ const authMiddleware = async (req, res, next) => {
       });
     }
 
+    req.token = token;
     req.user = user;
 
     next();

@@ -188,7 +188,9 @@ const getDashboardStats = async (req, res) => {
   try {
     const provider = await Provider.findOne({
       user: req.user._id,
-    });
+    })
+      .select("_id")
+      .lean();
 
     if (!provider) {
       return res.status(404).json({
@@ -200,7 +202,9 @@ const getDashboardStats = async (req, res) => {
     // Get all centers belonging to this provider
     const centers = await Center.find({
       provider: provider._id,
-    }).select("_id");
+    })
+      .select("_id")
+      .lean();
 
     if (!centers.length) {
       return res.status(200).json({
@@ -221,52 +225,48 @@ const getDashboardStats = async (req, res) => {
 
     const centerIds = centers.map((center) => center._id);
 
-    // Get all bookings from provider's centers
-    const bookings = await Booking.find({
-      center: { $in: centerIds },
-    });
+    // Parallel fetch with lean projection for fast response
+    const [bookings, totalCaregivers] = await Promise.all([
+      Booking.find({
+        center: { $in: centerIds },
+      })
+        .select("status paymentStatus amount createdAt")
+        .lean(),
+      Caregiver.countDocuments({
+        center: { $in: centerIds },
+      }),
+    ]);
 
     const totalBookings = bookings.length;
+    let pendingBookings = 0;
+    let approvedBookings = 0;
+    let rejectedBookings = 0;
+    let completedBookings = 0;
+    let totalRevenue = 0;
+    let monthlyRevenue = 0;
 
-    const pendingBookings = bookings.filter(
-      (booking) => booking.status?.toLowerCase() === "pending",
-    ).length;
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
-    const approvedBookings = bookings.filter(
-      (booking) => booking.status?.toLowerCase() === "approved",
-    ).length;
+    for (let i = 0; i < bookings.length; i++) {
+      const b = bookings[i];
+      const statusLower = b.status?.toLowerCase();
+      if (statusLower === "pending") pendingBookings++;
+      else if (statusLower === "approved") approvedBookings++;
+      else if (statusLower === "rejected") rejectedBookings++;
+      else if (statusLower === "completed") completedBookings++;
 
-    const rejectedBookings = bookings.filter(
-      (booking) => booking.status?.toLowerCase() === "rejected",
-    ).length;
-
-    const completedBookings = bookings.filter(
-      (booking) => booking.status?.toLowerCase() === "completed",
-    ).length;
-
-    const totalRevenue = bookings
-      .filter((booking) => booking.paymentStatus === "Paid")
-      .reduce((sum, booking) => sum + booking.amount, 0);
-
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-
-    const monthlyRevenue = bookings
-      .filter((booking) => {
-        const date = new Date(booking.createdAt);
-
-        return (
-          booking.paymentStatus === "Paid" &&
-          date.getMonth() === currentMonth &&
-          date.getFullYear() === currentYear
-        );
-      })
-      .reduce((sum, booking) => sum + booking.amount, 0);
-
-    // Get total caregivers from all provider centers
-    const totalCaregivers = await Caregiver.countDocuments({
-      center: { $in: centerIds },
-    });
+      if (b.paymentStatus === "Paid" && b.amount) {
+        totalRevenue += b.amount;
+        if (b.createdAt) {
+          const d = new Date(b.createdAt);
+          if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+            monthlyRevenue += b.amount;
+          }
+        }
+      }
+    }
 
     return res.status(200).json({
       success: true,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Building2, ImagePlus } from "lucide-react";
@@ -25,6 +25,7 @@ const CreateCenter = () => {
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [checking, setChecking] = useState(true);
+  const [existingCenter, setExistingCenter] = useState(null);
 
   const {
     register,
@@ -47,10 +48,8 @@ const CreateCenter = () => {
       try {
         const response = await getMyCenters();
 
-        if (response.centers.length > 0) {
-          toast.error("You have already created a childcare center.");
-
-          navigate("/provider/center");
+        if (response.centers && response.centers.length > 0) {
+          setExistingCenter(response.centers[0]);
         }
       } catch (error) {
         console.error(error);
@@ -60,7 +59,7 @@ const CreateCenter = () => {
     };
 
     checkCenter();
-  }, [navigate]);
+  }, []);
 
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files || []);
@@ -114,6 +113,43 @@ const CreateCenter = () => {
 
   if (checking) {
     return <Loading />;
+  }
+
+  if (existingCenter) {
+    return (
+      <div className="space-y-8">
+        <Reveal>
+          <div
+            className="overflow-hidden rounded-[30px] border p-8 lg:p-10"
+            style={{
+              background: "linear-gradient(135deg,#FFF7ED 0%,#FFEDD5 100%)",
+              borderColor: "#FED7AA",
+            }}
+          >
+            <Eyebrow>Centre Management</Eyebrow>
+            <h1 className="mt-3 text-3xl font-extrabold text-[#241C0F]">
+              You have already created a childcare centre
+            </h1>
+            <p className="mt-3 max-w-2xl text-[15px] text-[#7C2D12]">
+              Your account currently manages <strong>{existingCenter.centerName}</strong>. Under Little Steps policy, each provider is registered with one primary childcare centre. You can update and manage all your details anytime.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link to={`/provider/center/edit/${existingCenter._id}`}>
+                <Button icon={Building2} iconPosition="leading">
+                  Edit Existing Centre
+                </Button>
+              </Link>
+              <Link to="/provider/center">
+                <Button variant="outline" className="border-orange-300 bg-white hover:bg-orange-50">
+                  View Centre Details
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    );
   }
 
   return (

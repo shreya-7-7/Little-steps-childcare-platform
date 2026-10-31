@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
@@ -12,6 +12,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Info,
+  RotateCcw,
 } from "lucide-react";
 
 import { Button } from "../../components/ui/button";
@@ -57,9 +58,11 @@ const getEndDate = (planType, startDate) => {
 const CenterDetails = () => {
   const { slug } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [center, setCenter] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [caregivers, setCaregivers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState("Monthly");
@@ -75,24 +78,44 @@ const CenterDetails = () => {
   const fetchCenter = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       const data = await getCenterBySlug(slug);
 
+      if (!data?.center) {
+        throw new Error("Childcare centre information could not be found.");
+      }
+
       setCenter(data.center);
 
-      if (data.center?._id) {
-        const caregiverData = await getCaregivers({ center: data.center._id });
-        setCaregivers(caregiverData.caregivers || []);
+      // Parallelize caregivers and reviews requests
+      if (data.center._id) {
+        const centerId = data.center._id;
+        const [caregiverRes, reviewRes] = await Promise.allSettled([
+          getCaregivers({ center: centerId }),
+          getCenterReviews(centerId),
+        ]);
 
-        try {
-          const reviewData = await getCenterReviews(data.center._id);
-          setReviews(reviewData.reviews || []);
-        } catch (err) {
-          console.error("Failed to load reviews:", err);
+        if (caregiverRes.status === "fulfilled") {
+          setCaregivers(caregiverRes.value?.caregivers || []);
+        } else {
+          console.warn("Caregiver fetch warning:", caregiverRes.reason);
+          setCaregivers([]);
+        }
+
+        if (reviewRes.status === "fulfilled") {
+          setReviews(reviewRes.value?.reviews || []);
+        } else {
+          console.warn("Reviews fetch warning:", reviewRes.reason);
+          setReviews([]);
         }
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load center");
+    } catch (err) {
+      console.error("Failed to load centre details:", err);
+      const errMsg =
+        err.response?.data?.message || err.message || "Failed to load childcare centre details.";
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -100,22 +123,69 @@ const CenterDetails = () => {
 
   const handleSubscribe = () => setShowSubscriptionModal(true);
 
-  if (loading) return <Loading />;
+  if (loading) {
+    return (
+      <div className="flex min-h-[380px] flex-col items-center justify-center gap-4 py-16 text-center">
+        <Loading />
+        <p className="text-sm font-medium text-[#57534E] dark:text-[#A8A29E]">
+          Loading childcare centre details...
+        </p>
+      </div>
+    );
+  }
+
+  if (error && !center) {
+    return (
+      <div className="mx-auto max-w-lg py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+          <AlertCircle className="h-7 w-7" />
+        </div>
+        <h2 className="text-2xl font-bold text-[#1C1917] dark:text-[#F8FAFC]">
+          Unable to Load Childcare Centre
+        </h2>
+        <p className="mt-2 text-sm text-[#57534E] dark:text-[#D6D3D1]">
+          {error}
+        </p>
+        <div className="mt-6 flex justify-center gap-3">
+          <Button
+            onClick={fetchCenter}
+            className="bg-gradient-to-r from-[#FF9500] to-[#FFC300] font-semibold text-[#241C0F] hover:opacity-90"
+          >
+            <RotateCcw className="mr-1.5 h-4 w-4" />
+            Try Again
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="border-[#E7E5E4] font-semibold dark:border-[#292524] dark:text-[#F8FAFC]"
+          >
+            <Link to={returnPath}>
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
+              Back to Centres
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!center) {
     return (
       <div className="py-16 text-center">
-        <h2 className="text-2xl font-bold text-[#241C0F] dark:text-[#FFF6E2]">
-          Center not found
+        <h2 className="text-2xl font-bold text-[#1C1917] dark:text-[#F8FAFC]">
+          Centre not found
         </h2>
-        <p className="mt-2 text-[#6B5D45] dark:text-[#C9B896]">
-          The childcare center you are looking for does not exist or has been removed.
+        <p className="mt-2 text-sm text-[#57534E] dark:text-[#D6D3D1]">
+          The childcare centre you are looking for does not exist or has been removed.
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Button asChild className="rounded-xl">
+          <Button
+            asChild
+            className="rounded-xl bg-gradient-to-r from-[#FF9500] to-[#FFC300] font-semibold text-[#241C0F]"
+          >
             <Link to={returnPath}>
               <ArrowLeft className="mr-1.5 h-4 w-4" />
-              Back to Centers
+              Back to Centres
             </Link>
           </Button>
         </div>
@@ -450,25 +520,39 @@ const CenterDetails = () => {
         </div>
       )}
 
-      {/* Meet our caregivers */}
-      <div className="space-y-4">
+      {/* Meet Our Caregivers */}
+      <div className="space-y-5">
         <div>
-          <h2 className="text-2xl font-bold text-[#241C0F] dark:text-[#FFF6E2]">
-            Meet our caregivers
-          </h2>
-          <p className="text-sm text-[#6B5D45] dark:text-[#C9B896]">
-            Qualified childcare professionals assigned to this center.
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="text-2xl font-bold tracking-tight text-[#1C1917] dark:text-[#F8FAFC]">
+              Meet Our Caregivers
+            </h2>
+            <span className="rounded-full bg-amber-100 px-3 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
+              {caregivers.length} Dedicated Staff
+            </span>
+          </div>
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#44403C] dark:text-[#D6D3D1]">
+            Explore the certified, compassionate educators and childcare specialists assigned to this centre. Click any caregiver card to view their complete background, certifications, and experience.
           </p>
         </div>
 
         {caregivers.length === 0 ? (
-          <div className="rounded-2xl border border-[#F0E1BE] p-6 text-center text-[#6B5D45] dark:border-[#3A2E17] dark:text-[#C9B896]">
-            No caregivers currently registered for this center.
+          <div className="rounded-2xl border border-[#E7E5E4] bg-[#FAFAF9] p-8 text-center text-[#44403C] dark:border-[#292524] dark:bg-[#1C1917] dark:text-[#D6D3D1]">
+            <p className="font-bold text-[#1C1917] dark:text-[#F8FAFC]">
+              No caregivers currently registered for this centre.
+            </p>
+            <p className="mt-1 text-sm text-[#57534E] dark:text-[#A8A29E]">
+              Staff assignments will appear here once allocated by the childcare provider.
+            </p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             {caregivers.map((caregiver) => (
-              <CaregiverCard key={caregiver._id} caregiver={caregiver} />
+              <CaregiverCard
+                key={caregiver._id}
+                caregiver={caregiver}
+                returnPath={`${location.pathname}${location.search}`}
+              />
             ))}
           </div>
         )}
@@ -477,24 +561,24 @@ const CenterDetails = () => {
       {/* Genuine Parent Reviews */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[#241C0F] dark:text-[#FFF6E2]">
+          <h2 className="text-2xl font-bold text-[#1C1917] dark:text-[#F8FAFC]">
             Parent Reviews & Experiences
           </h2>
           <span className="flex items-center gap-1.5 text-sm font-semibold text-[#FF9500]">
             <Star className="h-4 w-4 fill-[#FF9500] text-[#FF9500]" />
             {center.rating > 0 ? `${center.rating} / 5.0` : "New Center"}
-            <span className="text-xs text-[#6B5D45] dark:text-[#C9B896]">
+            <span className="text-xs font-medium text-[#57534E] dark:text-[#A8A29E]">
               ({center.reviewCount || 0} {center.reviewCount === 1 ? "review" : "reviews"})
             </span>
           </span>
         </div>
 
         {reviews.length === 0 ? (
-          <div className="rounded-2xl border border-[#F0E1BE] p-8 text-center text-[#6B5D45] dark:border-[#3A2E17] dark:text-[#C9B896]">
-            <p className="font-medium text-[#241C0F] dark:text-[#FFF6E2]">
+          <div className="rounded-2xl border border-[#E7E5E4] bg-[#FAFAF9] p-8 text-center text-[#44403C] dark:border-[#292524] dark:bg-[#1C1917] dark:text-[#D6D3D1]">
+            <p className="font-bold text-[#1C1917] dark:text-[#F8FAFC]">
               No parent reviews yet
             </p>
-            <p className="mt-1 text-sm">
+            <p className="mt-1 text-sm text-[#57534E] dark:text-[#A8A29E]">
               Reviews appear here once parents complete their childcare bookings at this center.
             </p>
           </div>
@@ -503,7 +587,7 @@ const CenterDetails = () => {
             {reviews.map((rev) => (
               <div
                 key={rev._id}
-                className="rounded-2xl border border-[#F0E1BE] bg-white p-5 shadow-sm dark:border-[#3A2E17] dark:bg-[#211B10]"
+                className="rounded-2xl border border-[#E7E5E4] bg-white p-5 shadow-sm dark:border-[#292524] dark:bg-[#1C1917]"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -511,10 +595,10 @@ const CenterDetails = () => {
                       {rev.parent?.name ? rev.parent.name.charAt(0).toUpperCase() : "P"}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-[#241C0F] dark:text-[#FFF6E2]">
+                      <p className="text-sm font-bold text-[#1C1917] dark:text-[#F8FAFC]">
                         {rev.parent?.name || "Verified Parent"}
                       </p>
-                      <p className="text-xs text-[#6B5D45] dark:text-[#C9B896]">
+                      <p className="text-xs font-medium text-[#57534E] dark:text-[#A8A29E]">
                         {new Date(rev.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -532,7 +616,7 @@ const CenterDetails = () => {
                     ))}
                   </div>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-[#4A3E2C] dark:text-[#D6C7A8]">
+                <p className="mt-3 text-sm leading-relaxed text-[#292524] dark:text-[#E7E5E4]">
                   "{rev.comment}"
                 </p>
               </div>
@@ -606,6 +690,7 @@ const CenterDetails = () => {
                   buttonText="Continue payment"
                   payload={{
                     center: center._id,
+                    centerName: center.centerName,
                     planType: selectedPlan,
                     startDate,
                     endDate,
@@ -613,6 +698,7 @@ const CenterDetails = () => {
                   onSuccess={() => {
                     setShowSubscriptionModal(false);
                     toast.success("Subscription activated successfully");
+                    navigate("/parent/my-subscriptions");
                   }}
                 />
               </div>

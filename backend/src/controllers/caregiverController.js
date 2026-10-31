@@ -12,7 +12,7 @@ const createCaregiver = async (req, res) => {
     // ===============================
     // Request Body
     // ===============================
-    const { center, fullName, qualification, experience, specialization } =
+    const { center, fullName, qualification, experience, specialization, bio, certifications } =
       req.body;
 
     // ===============================
@@ -72,12 +72,25 @@ const createCaregiver = async (req, res) => {
     // ===============================
     // Create Caregiver
     // ===============================
+    let parsedCertifications = [];
+    if (Array.isArray(certifications)) {
+      parsedCertifications = certifications;
+    } else if (typeof certifications === "string") {
+      try {
+        parsedCertifications = JSON.parse(certifications);
+      } catch {
+        parsedCertifications = certifications.split(",").map((c) => c.trim()).filter(Boolean);
+      }
+    }
+
     const caregiver = await Caregiver.create({
       center: selectedCenter._id,
       fullName,
       qualification,
       experience,
-      specialization,
+      specialization: specialization || "",
+      bio: bio || "",
+      certifications: parsedCertifications,
       profileImage,
     });
 
@@ -152,9 +165,10 @@ const getProviderCaregivers = async (req, res) => {
     });
 
     if (!centers.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No centers found",
+      return res.status(200).json({
+        success: true,
+        totalCaregivers: 0,
+        caregivers: [],
       });
     }
 
@@ -191,9 +205,16 @@ const getProviderCaregivers = async (req, res) => {
 // ===============================
 const getSingleCaregiver = async (req, res) => {
   try {
-    console.log("Requested ID:", req.params.id);
+    const rawId = req.params.id ? req.params.id.trim() : "";
 
-    const caregiver = await Caregiver.findById(req.params.id).populate({
+    if (!rawId || !/^[0-9a-fA-F]{24}$/.test(rawId)) {
+      return res.status(404).json({
+        success: false,
+        message: "Caregiver not found",
+      });
+    }
+
+    const caregiver = await Caregiver.findById(rawId).populate({
       path: "center",
       select: "centerName city slug address state",
     });

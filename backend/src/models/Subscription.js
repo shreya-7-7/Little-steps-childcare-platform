@@ -14,6 +14,19 @@ const subscriptionSchema = new mongoose.Schema(
       required: true,
     },
 
+    tier: {
+      type: String,
+      enum: ["Basic", "Standard", "Premium"],
+      default: null,
+    },
+
+    benefits: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
     planType: {
       type: String,
       enum: ["Monthly", "Quarterly", "Yearly"],

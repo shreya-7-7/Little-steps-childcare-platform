@@ -77,7 +77,15 @@ const DemoPaymentModal = ({
                 Payment Simulated Successfully!
               </h3>
               <p className="mt-1 text-xs text-[#6B5D45] dark:text-[#C9B896]">
-                Booking payment status updated to <strong>Paid</strong>.
+                {orderData.isSubscription ? (
+                  <>
+                    Subscription status updated to <strong>Active</strong>.
+                  </>
+                ) : (
+                  <>
+                    Booking payment status updated to <strong>Paid</strong>.
+                  </>
+                )}
               </p>
             </div>
 
@@ -112,7 +120,7 @@ const DemoPaymentModal = ({
               onClick={handleClose}
               className="w-full rounded-xl bg-gradient-to-r from-[#FF9500] to-[#FFC300] py-2.5 font-semibold text-[#241C0F]"
             >
-              Continue to Bookings
+              {orderData.isSubscription ? "Continue to Subscriptions" : "Continue to Bookings"}
             </Button>
           </div>
         ) : (
@@ -125,6 +133,14 @@ const DemoPaymentModal = ({
                   {orderData.centerName || "Childcare Centre"}
                 </span>
               </div>
+              {orderData.planType && (
+                <div className="flex justify-between">
+                  <span className="text-[#6B5D45] dark:text-[#C9B896]">Plan:</span>
+                  <span className="font-semibold text-[#241C0F] dark:text-[#FFF6E2]">
+                    {orderData.planType} Subscription
+                  </span>
+                </div>
+              )}
               {orderData.childName && (
                 <div className="flex justify-between">
                   <span className="text-[#6B5D45] dark:text-[#C9B896]">Child:</span>

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
 import Navbar from "../common/Navbar";
 import ParentSidebar from "./ParentSidebar";
+import RouteLoadingBar from "../common/RouteLoadingBar";
 
 import { useTheme } from "../../context/ThemeContext";
 
@@ -39,7 +40,9 @@ const ParentLayout = () => {
           "
           style={{ backgroundColor: colors.bg }}
         >
-          <Outlet />
+          <Suspense fallback={<RouteLoadingBar />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
+import RouteLoadingBar from "../../common/RouteLoadingBar";
 
 const AdminLayout = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -25,7 +26,9 @@ const AdminLayout = () => {
         <AdminNavbar onSidebarOpen={openSidebar} />
 
         <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
-          <Outlet />
+          <Suspense fallback={<RouteLoadingBar />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

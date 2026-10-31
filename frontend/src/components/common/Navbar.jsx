@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
 import UserMenu from "../common/UserMenu";
@@ -13,29 +13,41 @@ import Button from "./Button";
 export default function Navbar({ onSidebarOpen }) {
   const { colors, dark: isDark, toggle } = useTheme();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const links = ["About", "Services", "How it works", "Centers", "FAQ"];
   const { user } = useAuth();
 
   const handleNavClick = (e, hashId) => {
-    if (typeof window !== "undefined" && window.location.pathname === "/") {
+    e.preventDefault();
+    if (location.pathname === "/") {
       const el = document.getElementById(hashId);
       if (el) {
-        e.preventDefault();
         el.scrollIntoView({ behavior: "smooth" });
         window.history.pushState(null, "", `#${hashId}`);
       }
+    } else {
+      navigate(`/#${hashId}`);
+      setTimeout(() => {
+        const el = document.getElementById(hashId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 150);
     }
   };
 
   const handleLogoClick = (e) => {
-    if (typeof window !== "undefined" && window.location.pathname === "/") {
+    e.preventDefault();
+    if (location.pathname === "/") {
       const el = document.getElementById("top");
       if (el) {
-        e.preventDefault();
         el.scrollIntoView({ behavior: "smooth" });
         window.history.pushState(null, "", "#top");
       }
+    } else {
+      navigate("/");
     }
   };
 
@@ -48,8 +60,8 @@ export default function Navbar({ onSidebarOpen }) {
       }}
     >
       <div className="max-w-6xl mx-auto px-5 sm:px-8 flex items-center justify-between h-16">
-        <a
-          href="/#top"
+        <Link
+          to="/"
           onClick={handleLogoClick}
           className="flex items-center gap-2 font-bold text-lg"
           style={{
@@ -59,21 +71,21 @@ export default function Navbar({ onSidebarOpen }) {
         >
           <LogoMark />
           Little Steps
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
           {links.map((l) => {
             const hashId = l.toLowerCase().replace(/\s+/g, "-");
             return (
-              <a
+              <Link
                 key={l}
-                href={`/#${hashId}`}
+                to={`/#${hashId}`}
                 onClick={(e) => handleNavClick(e, hashId)}
                 className="hover:opacity-70 transition-opacity"
                 style={{ color: colors.text }}
               >
                 {l}
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -139,9 +151,9 @@ export default function Navbar({ onSidebarOpen }) {
           {links.map((l) => {
             const hashId = l.toLowerCase().replace(/\s+/g, "-");
             return (
-              <a
+              <Link
                 key={l}
-                href={`/#${hashId}`}
+                to={`/#${hashId}`}
                 onClick={(e) => {
                   setOpen(false);
                   handleNavClick(e, hashId);
@@ -150,7 +162,7 @@ export default function Navbar({ onSidebarOpen }) {
                 className="text-sm font-medium pt-4"
               >
                 {l}
-              </a>
+              </Link>
             );
           })}
 

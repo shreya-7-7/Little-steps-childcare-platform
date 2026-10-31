@@ -3,24 +3,72 @@ import { toast } from "sonner";
 
 import Loading from "../../components/common/Loading";
 import BookingCard from "../../components/parent/BookingCard";
+import useAuth from "../../hooks/useAuth";
 
 import { getMyBookings, cancelBooking } from "../../services/bookingService";
 import { useTheme } from "../../context/ThemeContext";
 
+let myBookingsCache = {
+  userId: null,
+  bookings: null,
+};
+
 const MyBookings = () => {
   const { colors } = useTheme();
+  const { user } = useAuth();
 
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const isCached = Boolean(
+    user?._id &&
+      myBookingsCache.userId === user._id &&
+      Array.isArray(myBookingsCache.bookings),
+  );
+
+  const [bookings, setBookings] = useState(
+    isCached ? myBookingsCache.bookings : [],
+  );
+  const [loading, setLoading] = useState(!isCached);
 
   useEffect(() => {
+    let isMounted = true;
+    const fetchBookings = async () => {
+      try {
+        const data = await getMyBookings();
+        if (isMounted && data?.bookings) {
+          setBookings(data.bookings);
+          if (user?._id) {
+            myBookingsCache = {
+              userId: user._id,
+              bookings: data.bookings,
+            };
+          }
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to load bookings");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchBookings();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [user?._id]);
 
   const fetchBookings = async () => {
     try {
       const data = await getMyBookings();
-      setBookings(data.bookings);
+      if (data?.bookings) {
+        setBookings(data.bookings);
+        if (user?._id) {
+          myBookingsCache = {
+            userId: user._id,
+            bookings: data.bookings,
+          };
+        }
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load bookings");
     } finally {

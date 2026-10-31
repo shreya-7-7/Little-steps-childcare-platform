@@ -22,42 +22,68 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 import Loading from "../../components/common/Loading";
-import { getCurrentUser } from "../../services/authService";
+import useAuth from "../../hooks/useAuth";
 import { getMyBookings } from "../../services/bookingService";
+
+// Safe, user-scoped memory cache for instant tab transitions
+let parentDashboardCache = {
+  userId: null,
+  bookings: null,
+};
 
 const ParentDashboard = () => {
   const hour = new Date().getHours();
   const { colors } = useTheme();
   const greeting =
     hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
-  const [user, setUser] = useState(null);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  const { user: authUser } = useAuth();
+  const isCached = Boolean(
+    authUser?._id &&
+      parentDashboardCache.userId === authUser._id &&
+      Array.isArray(parentDashboardCache.bookings),
+  );
+
+  const [user, setUser] = useState(authUser || null);
+  const [bookings, setBookings] = useState(
+    isCached ? parentDashboardCache.bookings : [],
+  );
+  const [loading, setLoading] = useState(!isCached);
 
   useEffect(() => {
+    if (authUser) {
+      setUser(authUser);
+    }
+  }, [authUser]);
+
+  useEffect(() => {
+    let isMounted = true;
     const fetchDashboardData = async () => {
       try {
-        const [userData, bookingsData] = await Promise.allSettled([
-          getCurrentUser(),
-          getMyBookings(),
-        ]);
-
-        if (userData.status === "fulfilled" && userData.value?.user) {
-          setUser(userData.value.user);
-        }
-
-        if (bookingsData.status === "fulfilled" && bookingsData.value?.bookings) {
-          setBookings(bookingsData.value.bookings);
+        const bookingsData = await getMyBookings();
+        if (isMounted && bookingsData?.bookings) {
+          setBookings(bookingsData.bookings);
+          if (authUser?._id) {
+            parentDashboardCache = {
+              userId: authUser._id,
+              bookings: bookingsData.bookings,
+            };
+          }
         }
       } catch (error) {
         console.error("Dashboard data load error:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchDashboardData();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [authUser?._id]);
 
   if (loading) {
     return <Loading />;

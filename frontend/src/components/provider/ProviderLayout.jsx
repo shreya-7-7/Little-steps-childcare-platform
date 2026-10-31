@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
 import ProviderSidebar from "./ProviderSidebar";
 import ProviderHeader from "./ProviderHeader";
+import RouteLoadingBar from "../common/RouteLoadingBar";
 
 import { useTheme } from "../../context/ThemeContext";
 
@@ -56,7 +57,9 @@ const ProviderLayout = () => {
             }}
           >
             <div className="mx-auto w-full max-w-7xl">
-              <Outlet />
+              <Suspense fallback={<RouteLoadingBar />}>
+                <Outlet />
+              </Suspense>
             </div>
           </main>
         </div>

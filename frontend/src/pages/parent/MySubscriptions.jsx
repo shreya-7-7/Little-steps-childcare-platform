@@ -9,7 +9,13 @@ import {
   cancelSubscription,
 } from "../../services/subscriptionService";
 import Loading from "../../components/common/Loading";
+import useAuth from "../../hooks/useAuth";
 import { Button } from "@/components/ui/button";
+
+let mySubscriptionsCache = {
+  userId: null,
+  subscriptions: null,
+};
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "--";
@@ -53,16 +59,30 @@ const getStatusBadge = (status) => {
 };
 
 const MySubscriptions = () => {
-  const [subscriptions, setSubscriptions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const isCached = Boolean(
+    user?._id &&
+      mySubscriptionsCache.userId === user._id &&
+      Array.isArray(mySubscriptionsCache.subscriptions),
+  );
+
+  const [subscriptions, setSubscriptions] = useState(
+    isCached ? mySubscriptionsCache.subscriptions : [],
+  );
+  const [loading, setLoading] = useState(!isCached);
   const [cancellingId, setCancellingId] = useState(null);
 
   const fetchSubscriptions = async () => {
     try {
-      setLoading(true);
       const response = await getMySubscriptions();
       if (response.success) {
         setSubscriptions(response.subscriptions || []);
+        if (user?._id) {
+          mySubscriptionsCache = {
+            userId: user._id,
+            subscriptions: response.subscriptions || [],
+          };
+        }
       }
     } catch (error) {
       toast.error(

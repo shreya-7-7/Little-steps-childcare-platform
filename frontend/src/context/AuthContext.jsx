@@ -17,6 +17,21 @@ const AuthProvider = ({ children }) => {
   // Get Current User
   // ==========================
   const fetchCurrentUser = async () => {
+    // Check if any valid auth token exists before querying the backend
+    if (typeof window !== "undefined") {
+      const hasStoredToken =
+        Boolean(localStorage.getItem("token")) ||
+        Boolean(localStorage.getItem("token_parent")) ||
+        Boolean(localStorage.getItem("token_provider")) ||
+        Boolean(localStorage.getItem("token_admin"));
+
+      if (!hasStoredToken) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const data = await getCurrentUser();
       if (data?.token && typeof window !== "undefined") {
